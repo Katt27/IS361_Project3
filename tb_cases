@@ -1,0 +1,23 @@
+-- SQL Script to calculate TB infection rates by country and year
+
+-- Assume the structure of tb_cases table is as follows:
+-- tb_cases(country VARCHAR(255), year INT, cases INT)
+
+-- Calculate TB infection rates
+SELECT 
+    p.country,
+    p.year,
+    IFNULL(SUM(t.cases), 0) AS TotalCases,  -- Handle NULL values by treating them as zero
+    p.population,
+    CASE 
+        WHEN p.population > 0 THEN ROUND((IFNULL(SUM(t.cases), 0) / p.population) * 100000, 2)
+        ELSE 0
+    END AS RatePer100k  -- Calculate rates per 100,000 population
+FROM 
+    population p
+LEFT JOIN 
+    tb_cases t ON p.country = t.country AND p.year = t.year
+GROUP BY 
+    p.country, p.year
+ORDER BY 
+    p.country, p.year;
